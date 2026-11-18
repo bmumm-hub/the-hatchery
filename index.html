@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Hatchery</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Trebuchet MS',Arial,sans-serif;color:#34334f;background:linear-gradient(135deg,#f9eaff,#e4f8f3,#fff4dc);min-height:100vh}
+header{text-align:center;padding:25px 15px}
+h1{font-size:clamp(34px,6vw,58px);margin:0;color:#7056a8;letter-spacing:3px}
+header p{font-size:17px;color:#68647e}
+h2{text-align:center;margin:5px 0 20px}
+.grid{max-width:1150px;margin:auto;padding:10px 20px 35px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.team{background:white;border-radius:24px;padding:18px;text-align:center;box-shadow:0 8px 25px #62508018;border-top:7px solid var(--c)}
+.team h2{font-size:23px;margin:8px}
+.points{font-size:17px;font-weight:bold;color:var(--c)}
+.pet{font-size:100px;height:130px;display:grid;place-items:center;animation:float 3s infinite}
+.stage{font-weight:bold;color:#665b83;font-size:17px}
+.sub{font-size:13px;color:#888;margin:6px}
+.track{height:13px;background:#eeeaf4;border-radius:20px;margin:14px 0;overflow:hidden}
+.fill{height:100%;width:0;background:var(--c);transition:width .4s}
+.buttons{display:flex;gap:8px}
+button{border:0;border-radius:12px;padding:12px;font-size:15px;font-weight:bold;cursor:pointer}
+.add{background:var(--c);color:white;flex:1}
+.remove{background:#eeeaf4;color:#555;width:55px}
+button:hover{filter:brightness(.95)}
+button:focus-visible{outline:3px solid #333;outline-offset:3px}
+@keyframes float{50%{transform:translateY(-9px) rotate(3deg)}}
+#celebrate{position:fixed;inset:0;display:none;place-items:center;background:#32234a99;z-index:5}
+#celebrate div{background:white;border-radius:25px;padding:35px;text-align:center;font-size:25px;margin:20px}
+#celebrate button{background:#7056a8;color:white;margin-top:15px}
+@media(max-width:750px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>🥚 THE HATCHERY ✨</h1>
+<p>Big teamwork. Tiny beginnings. Magical discoveries!</p>
+</header>
+<h2>🌟 Which team will hatch first? 🌟</h2>
+<div class="grid" id="teams"></div>
+<div id="celebrate">
+<div>
+<h1>🎉</h1>
+<h2 id="winner"></h2>
+<div style="font-size:85px" id="baby"></div>
+<p>Your egg has hatched!</p>
+<button onclick="closeCelebration()">Hooray!</button>
+</div>
+</div>
+<script>
+const teams=[
+{name:"Dragons",color:"#ed806c",baby:"🐉"},
+{name:"Unicorns",color:"#b18bdc",baby:"🦄"},
+{name:"Phoenixes",color:"#edaa58",baby:"🐥"},
+{name:"Griffins",color:"#d5ae51",baby:"🦅"},
+{name:"Axolotls",color:"#55b9bd",baby:"🦎"},
+{name:"Forest Spirits",color:"#78ad83",baby:"🧚"}
+];
+let scores=JSON.parse(localStorage.getItem("hatchery")||"[0,0,0,0,0,0]");
+if(!Array.isArray(scores)||scores.length!==6)scores=[0,0,0,0,0,0];
+function save(){localStorage.setItem("hatchery",JSON.stringify(scores))}
+function draw(){
+document.getElementById("teams").innerHTML=teams.map((t,i)=>{
+let s=Math.min(scores[i],5);
+let names=["Mystery Egg","A little glow!","First cracks!","It's shaking!","Almost hatch time!","HATCHED!"];
+let egg=s===5?t.baby:s>=4?"🐣":s>=2?"🥚✨":"🥚";
+return `<article class="team" style="--c:${t.color}">
+<h2>${t.name}</h2>
+<div class="points">${scores[i]} POINTS</div>
+<div class="pet">${egg}</div>
+<div class="stage">${names[s]}</div>
+<div class="sub">${s===5?"Creature unlocked!":(5-s)+" more points to hatch!"}</div>
+<div class="track"><div class="fill" style="width:${s*20}%"></div></div>
+<div class="buttons">
+<button class="remove" onclick="change(${i},-1)">− 1</button>
+<button class="add" onclick="change(${i},1)">＋ ADD POINT</button>
+</div></article>`;
+}).join("");
+}
+function change(i,n){
+let before=Math.min(scores[i],5);
+scores[i]=Math.max(0,scores[i]+n);
+save();draw();
+if(n>0&&before<5&&scores[i]>=5){
+document.getElementById("winner").textContent=teams[i].name+" HATCHED!";
+document.getElementById("baby").textContent=teams[i].baby;
+document.getElementById("celebrate").style.display="grid";
+}
+}
+function closeCelebration(){document.getElementById("celebrate").style.display="none"}
+draw();
+</script>
+</body>
+</html>
